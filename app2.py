@@ -75,7 +75,33 @@ app.layout = html.Div(children=[
         }),
     ], className='six columns'),
 
+    html.Div(children=[
+        dcc.Graph(id='price-boxplot', figure={
+            'data': [{
+                'y': oil_df['Price'],
+                'type': 'box'
+            }],
+            'layout': {
+                'title': 'Oil Prices Boxplot'
+            }
+        }),
+    ], className='six columns'),
+
+    html.Div(children=[
+        dcc.Graph(id='price-scatterplot', figure={
+            'data': [{
+                'x': oil_df['Date'],
+                'y': oil_df['Price'],
+                'mode': 'markers'
+            }],
+            'layout': {
+                'title': 'Oil Prices Scatterplot'
+            }
+        }),
+    ], className='six columns'),
+
 ], className='container')
+
 
 @app.callback(
     dash.dependencies.Output('submit-button', 'n_clicks'),
@@ -147,6 +173,56 @@ def update_price_histogram(n_clicks, energy_type):
         }
     }
 
+@app.callback(
+    dash.dependencies.Output('price-boxplot', 'figure'),
+    [dash.dependencies.Input('submit-button', 'n_clicks')],
+    [dash.dependencies.State('energy-type-dropdown', 'value')]
+)
+def update_price_boxplot(n_clicks, energy_type):
+    n_clicks = update_n_clicks(n_clicks)
+    
+    if energy_type == 'oil':
+        data = oil_df
+    else:
+        data = gas_df
+
+    return {
+        'data': [{
+            'y': data['Price'],
+            'type': 'box',
+            'name': energy_type
+        }],
+        'layout': {
+            'title': f'{energy_type.capitalize()} Prices Distribution'
+        }
+    }
+
+
+@app.callback(
+    dash.dependencies.Output('price-scatterplot', 'figure'),
+    [dash.dependencies.Input('submit-button', 'n_clicks')],
+    [dash.dependencies.State('energy-type-dropdown', 'value')]
+)
+def update_price_scatterplot(n_clicks, energy_type):
+    n_clicks = update_n_clicks(n_clicks)
+    
+    if energy_type == 'oil':
+        data = oil_df
+    else:
+        data = gas_df
+
+    return {
+        'data': [{
+            'x': data['Date'],
+            'y': data['Price'],
+            'mode': 'markers',
+            'type': 'scatter',
+            'name': energy_type
+        }],
+        'layout': {
+            'title': f'{energy_type.capitalize()} Prices Over Time'
+        }
+    }
 
 
 if __name__ == '__main__':
