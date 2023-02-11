@@ -1,0 +1,12 @@
+# Dependency management:
+The code requires dash, dash.html, dash.dcc, pandas, and dask.dataframe libraries.
+All this libraries can easily be installed using the python manager 'pip install package'
+'pip install dash pandas datapackage dask'
+A load_prices_dask function is defined to load two energy price datasets from DataHub as a Pandas dataframe and perform data cleaning operations on them (e.g., removing missing values).
+The oil_df and gas_df dataframes are created using the load_prices_dask function.
+A dash app is initialized with a layout defined in HTML. The layout consists of:
+A dropdown menu to select between oil and natural gas prices
+A submit button to trigger the update of the price graphs and histograms
+Four graphs to display the line graph of energy prices, histogram of prices, boxplot of prices, and scatterplot of prices over time.
+Callback functions are defined to update the graphs and histograms whenever the submit button is clicked.
+The code also defines an update_n_clicks function to increment the number of clicks on the submit button.
