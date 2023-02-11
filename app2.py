@@ -4,21 +4,28 @@ from dash import dcc
 import pandas as pd
 import datapackage
 
-# Load the oil prices DataFrame
-package = datapackage.Package('https://datahub.io/core/oil-prices/datapackage.json')
-resources = package.resources
-for resource in resources:
-    if resource.tabular:
-        oil_df = pd.read_csv(resource.descriptor['path'])
-        oil_df = oil_df[oil_df.columns.intersection(['Date', 'Price'])]
+import dask.dataframe as dd
 
-# Load the natural gas prices DataFrame
-package = datapackage.Package('https://datahub.io/core/natural-gas/datapackage.json')
-resources = package.resources
-for resource in resources:
-    if resource.tabular:
-        gas_df = pd.read_csv(resource.descriptor['path'])
-        gas_df = gas_df[gas_df.columns.intersection(['Date', 'Price'])]
+def load_prices_dask(package_url, columns):
+    package = datapackage.Package(package_url)
+    resources = package.resources
+    dfs = []
+    for resource in resources:
+        if resource.tabular:
+            df = dd.read_csv(resource.descriptor['path'], sample=1000000) # increase the sample size to 1 MB
+            df = df[df.columns.intersection(columns)]
+            dfs.append(df)
+    df = dd.concat(dfs)
+    return df.dropna().compute()
+
+oil_df = load_prices_dask('https://datahub.io/core/oil-prices/datapackage.json', ['Date', 'Price'])
+gas_df = load_prices_dask('https://datahub.io/core/natural-gas/datapackage.json', ['Date', 'Price'])
+
+print('Oil DataFrame:')
+print(oil_df)
+print('Natural Gas DataFrame:')
+print(gas_df)
+
 
 # Initialize the dash app
 app = dash.Dash()
